@@ -114,6 +114,7 @@
     .lightbox { position:fixed; z-index:90; inset:0; display:grid; place-items:center; overflow:hidden; padding:0; background:rgba(38,7,13,.28); backdrop-filter:blur(5px); opacity:0; pointer-events:none; transition:opacity .25s ease; }
     .lightbox.is-open { opacity:1; pointer-events:auto; }
     .lightbox::before { content:"Gallery"; position:absolute; z-index:1; top:calc(env(safe-area-inset-top) + 22px); left:50%; color:#f9e7a7; font:600 .7rem Cinzel,serif; letter-spacing:.2em; text-transform:uppercase; transform:translateX(-50%); }
+    .lightbox-frame { display:grid; place-items:center; width:max-content; max-width:90vw; max-height:82svh; }
     .lightbox img { width:auto; height:auto; max-width:90vw; max-height:82svh; border:1px solid rgba(249,231,167,.45); border-radius:14px; box-shadow:0 18px 60px rgba(0,0,0,.38); cursor:zoom-in; object-fit:contain; transform:scale(.96); transition:transform .28s ease; }
     .lightbox.is-open img { transform:scale(1); }
     .lightbox.is-zoomed img { transform:scale(1.5); cursor:zoom-out; }
@@ -121,6 +122,13 @@
     .lightbox-close::before, .lightbox-close::after { content:""; position:absolute; width:17px; height:1.5px; border-radius:2px; background:#f9e7a7; }
     .lightbox-close::before { transform:rotate(45deg); } .lightbox-close::after { transform:rotate(-45deg); }
     .lightbox-close:hover { transform:rotate(90deg); background:#9b2636; }
+    .lightbox-nav { position:absolute; z-index:2; top:50%; display:grid; place-items:center; width:52px; height:52px; padding:0; border:1px solid rgba(249,231,167,.75); border-radius:50%; background:linear-gradient(135deg,#851f2e,#5b0e1a); color:#f9e7a7; box-shadow:0 6px 18px rgba(0,0,0,.28); cursor:pointer; font:400 2.2rem/1 "Cormorant Garamond",serif; transform:translateY(-50%); transition:transform .2s ease,background .2s ease; }
+    .lightbox-nav:hover { transform:translateY(-50%) scale(1.08); background:#9b2636; }
+    /* Horizontal placement is set outside the real image frame in JavaScript. */
+    .lightbox-prev { left:16px; }
+    .lightbox-next { left:auto; right:16px; }
+    .lightbox img.slide-from-right { animation:photo-slide-from-right .28s ease both; }
+    .lightbox img.slide-from-left { animation:photo-slide-from-left .28s ease both; }
     .map-share { display:grid; grid-template-columns:1.2fr .8fr; gap:0; max-width:900px; margin:42px auto 0; background:#fffdf8; box-shadow:0 10px 40px rgba(68,37,27,.10); text-align:center; }
     .map-share > div { padding:30px; } .map-share > div + div { border-left:1px solid #ecdfc7; }
     .map-share h3 { margin:0 0 20px; color:var(--wine); font:700 1.7rem "Cormorant Garamond",serif; }
@@ -158,7 +166,7 @@
     .music-symbol { font-family:"Cormorant Garamond",serif; font-size:1.6rem; line-height:1; }
     .music-label { display:none; }
     .music-hint { position:absolute; right:0; bottom:61px; width:max-content; padding:8px 11px; border:1px solid rgba(166,122,45,.35); border-radius:7px; background:rgba(255,250,240,.94); color:var(--wine); box-shadow:0 5px 14px rgba(61,15,23,.10); font:600 .65rem Cinzel,serif; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
-    @keyframes appear { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } } @keyframes groom-arrives { from { opacity:0; transform:translateX(-55vw); } 78% { opacity:1; transform:translateX(1.5vw); } to { opacity:1; transform:translateX(0); } } @keyframes bride-arrives { from { opacity:0; transform:translateX(55vw); } 78% { opacity:1; transform:translateX(-1.5vw); } to { opacity:1; transform:translateX(0); } } @keyframes amp-arrives { from { opacity:0; transform:scale(.3) rotate(-20deg); } to { opacity:1; transform:scale(1) rotate(0); } } @keyframes parent-arrives { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } } @keyframes footer-groom-arrives { from { opacity:0; transform:translateX(-75vw); } 78% { opacity:1; transform:translateX(5px); } to { opacity:1; transform:translateX(0); } } @keyframes footer-bride-arrives { from { opacity:0; transform:translateX(75vw); } 78% { opacity:1; transform:translateX(-5px); } to { opacity:1; transform:translateX(0); } } @keyframes knock { 0%,66%,100% { transform:translateY(0); } 72% { transform:translateY(3px); } 78% { transform:translateY(0); } 84% { transform:translateY(3px); } 90% { transform:translateY(0); } } @keyframes music-jiggle { 0%,82%,100% { transform:rotate(0); } 86% { transform:rotate(-8deg); } 90% { transform:rotate(7deg); } 94% { transform:rotate(-4deg); } 97% { transform:rotate(2deg); } }
+    @keyframes appear { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } } @keyframes groom-arrives { from { opacity:0; transform:translateX(-55vw); } 78% { opacity:1; transform:translateX(1.5vw); } to { opacity:1; transform:translateX(0); } } @keyframes bride-arrives { from { opacity:0; transform:translateX(55vw); } 78% { opacity:1; transform:translateX(-1.5vw); } to { opacity:1; transform:translateX(0); } } @keyframes amp-arrives { from { opacity:0; transform:scale(.3) rotate(-20deg); } to { opacity:1; transform:scale(1) rotate(0); } } @keyframes parent-arrives { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } } @keyframes footer-groom-arrives { from { opacity:0; transform:translateX(-75vw); } 78% { opacity:1; transform:translateX(5px); } to { opacity:1; transform:translateX(0); } } @keyframes footer-bride-arrives { from { opacity:0; transform:translateX(75vw); } 78% { opacity:1; transform:translateX(-5px); } to { opacity:1; transform:translateX(0); } } @keyframes photo-slide-from-right { from { opacity:0; transform:translateX(38px) scale(.97); } to { opacity:1; transform:translateX(0) scale(1); } } @keyframes photo-slide-from-left { from { opacity:0; transform:translateX(-38px) scale(.97); } to { opacity:1; transform:translateX(0) scale(1); } } @keyframes knock { 0%,66%,100% { transform:translateY(0); } 72% { transform:translateY(3px); } 78% { transform:translateY(0); } 84% { transform:translateY(3px); } 90% { transform:translateY(0); } } @keyframes music-jiggle { 0%,82%,100% { transform:rotate(0); } 86% { transform:rotate(-8deg); } 90% { transform:rotate(7deg); } 94% { transform:rotate(-4deg); } 97% { transform:rotate(2deg); } }
     /* ========================================================================
        MOBILE OPENING SCREEN — portrait composition
        ======================================================================== */
@@ -283,7 +291,7 @@
   <!-- =======================================================================
        GALLERY PHOTO VIEWER
        ======================================================================= -->
-  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Expanded gallery photo" aria-hidden="true"><button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close photo viewer">×</button><img id="lightbox-image" src="" alt=""></div>
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Expanded gallery photo" aria-hidden="true"><button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close photo viewer">×</button><button class="lightbox-nav lightbox-prev" id="lightbox-prev" type="button" aria-label="Previous photo">‹</button><div class="lightbox-frame" id="lightbox-frame"><img id="lightbox-image" src="" alt=""></div><button class="lightbox-nav lightbox-next" id="lightbox-next" type="button" aria-label="Next photo">›</button></div>
   <script>
     /* =======================================================================
        1. OPENING CURTAIN & MUSIC CONTROL
@@ -320,13 +328,20 @@
     /* =======================================================================
        3. GALLERY PHOTO VIEWER
        ======================================================================= */
-    const lightbox = document.getElementById('lightbox'), lightboxImage = document.getElementById('lightbox-image'), lightboxClose = document.getElementById('lightbox-close');
+    const lightbox = document.getElementById('lightbox'), lightboxFrame = document.getElementById('lightbox-frame'), lightboxImage = document.getElementById('lightbox-image'), lightboxClose = document.getElementById('lightbox-close'), lightboxPrev = document.getElementById('lightbox-prev'), lightboxNext = document.getElementById('lightbox-next'), galleryImages = Array.from(document.querySelectorAll('.gallery img'));
+    let activeGalleryIndex = 0;
     const closeLightbox = () => { lightbox.classList.remove('is-open', 'is-zoomed'); lightbox.setAttribute('aria-hidden', 'true'); document.body.classList.remove('no-scroll'); };
-    document.querySelectorAll('.gallery img').forEach(image => image.addEventListener('click', () => { lightboxImage.src = image.currentSrc || image.src; lightboxImage.alt = image.alt; lightbox.classList.remove('is-zoomed'); lightbox.classList.add('is-open'); lightbox.setAttribute('aria-hidden', 'false'); document.body.classList.add('no-scroll'); }));
+    const positionLightboxNavigation = () => { if (!lightbox.classList.contains('is-open')) return; const frameBounds = lightboxFrame.getBoundingClientRect(), buttonSize = lightboxPrev.offsetWidth || 52; if (!frameBounds.width || !frameBounds.height) return; const gap = 24, screenInset = 16, centreY = frameBounds.top + frameBounds.height / 2; const previousLeft = Math.max(screenInset, frameBounds.left - buttonSize - gap); const nextLeft = Math.min(window.innerWidth - buttonSize - screenInset, frameBounds.right + gap); lightboxPrev.style.left = `${previousLeft}px`; lightboxPrev.style.top = `${centreY}px`; lightboxNext.style.left = `${nextLeft}px`; lightboxNext.style.right = 'auto'; lightboxNext.style.top = `${centreY}px`; };
+    const showGalleryPhoto = (index, direction = 0) => { activeGalleryIndex = (index + galleryImages.length) % galleryImages.length; const image = galleryImages[activeGalleryIndex]; lightboxImage.classList.remove('slide-from-left', 'slide-from-right'); void lightboxImage.offsetWidth; lightboxImage.src = image.currentSrc || image.src; lightboxImage.alt = image.alt; lightboxImage.classList.toggle('slide-from-right', direction > 0); lightboxImage.classList.toggle('slide-from-left', direction < 0); lightbox.classList.remove('is-zoomed'); requestAnimationFrame(positionLightboxNavigation); };
+    galleryImages.forEach((image, index) => image.addEventListener('click', () => { showGalleryPhoto(index); lightbox.classList.add('is-open'); lightbox.setAttribute('aria-hidden', 'false'); document.body.classList.add('no-scroll'); requestAnimationFrame(positionLightboxNavigation); }));
     lightboxClose.addEventListener('click', closeLightbox);
-    lightboxImage.addEventListener('click', event => { event.stopPropagation(); lightbox.classList.toggle('is-zoomed'); });
+    lightboxPrev.addEventListener('click', event => { event.stopPropagation(); showGalleryPhoto(activeGalleryIndex - 1, -1); });
+    lightboxNext.addEventListener('click', event => { event.stopPropagation(); showGalleryPhoto(activeGalleryIndex + 1, 1); });
+    lightboxImage.addEventListener('load', () => { requestAnimationFrame(positionLightboxNavigation); setTimeout(positionLightboxNavigation, 320); });
+    lightboxImage.addEventListener('click', event => { event.stopPropagation(); lightbox.classList.toggle('is-zoomed'); requestAnimationFrame(positionLightboxNavigation); });
     lightbox.addEventListener('click', event => { if (event.target === lightbox) closeLightbox(); });
-    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeLightbox(); });
+    document.addEventListener('keydown', event => { if (!lightbox.classList.contains('is-open')) return; if (event.key === 'Escape') closeLightbox(); if (event.key === 'ArrowLeft') showGalleryPhoto(activeGalleryIndex - 1, -1); if (event.key === 'ArrowRight') showGalleryPhoto(activeGalleryIndex + 1, 1); });
+    window.addEventListener('resize', positionLightboxNavigation);
 
     /* =======================================================================
        4. FALLING PETAL ANIMATION
