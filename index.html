@@ -118,12 +118,13 @@
     .lightbox img { width:auto; height:auto; max-width:90vw; max-height:82svh; border:1px solid rgba(249,231,167,.45); border-radius:14px; box-shadow:0 18px 60px rgba(0,0,0,.38); cursor:zoom-in; object-fit:contain; transform:scale(.96); transition:transform .28s ease; }
     .lightbox.is-open img { transform:scale(1); }
     .lightbox.is-zoomed img { transform:scale(1.5); cursor:zoom-out; }
-    .lightbox-close { position:absolute; z-index:2; top:calc(env(safe-area-inset-top) + 14px); right:calc(env(safe-area-inset-right) + 16px); display:grid; place-items:center; width:48px; height:48px; padding:0; border:1px solid rgba(249,231,167,.72); border-radius:50%; background:linear-gradient(135deg,#851f2e,#5b0e1a); box-shadow:0 6px 18px rgba(0,0,0,.28); cursor:pointer; font-size:0; transition:transform .2s ease,background .2s ease; }
+    .lightbox-close { position:absolute; z-index:2; top:calc(env(safe-area-inset-top) + 14px); right:calc(env(safe-area-inset-right) + 16px); display:grid; place-items:center; width:48px; height:48px; padding:0; border:1px solid rgba(249,231,167,.72); border-radius:50%; background:linear-gradient(135deg,#851f2e,#5b0e1a); box-shadow:0 6px 18px rgba(0,0,0,.28); cursor:pointer; font-size:0; -webkit-tap-highlight-color:transparent; transition:transform .2s ease,background .2s ease; }
     .lightbox-close::before, .lightbox-close::after { content:""; position:absolute; width:17px; height:1.5px; border-radius:2px; background:#f9e7a7; }
     .lightbox-close::before { transform:rotate(45deg); } .lightbox-close::after { transform:rotate(-45deg); }
     .lightbox-close:hover { transform:rotate(90deg); background:#9b2636; }
-    .lightbox-nav { position:absolute; z-index:2; top:50%; display:grid; place-items:center; width:60px; height:60px; padding:0; border:0; background:transparent; color:#851f2e; cursor:pointer; font:700 4.2rem/.8 "Cormorant Garamond",serif; text-shadow:0 0 1px #f9e7a7,0 0 5px rgba(255,244,201,.95),0 2px 8px rgba(48,7,14,.6); transform:translateY(-50%); transition:transform .2s ease,color .2s ease; }
+    .lightbox-nav { position:absolute; z-index:2; top:50%; display:grid; place-items:center; width:60px; height:60px; padding:0; border:0; background:transparent; color:#851f2e; cursor:pointer; font:700 4.2rem/.8 "Cormorant Garamond",serif; text-shadow:0 0 1px #f9e7a7,0 0 5px rgba(255,244,201,.95),0 2px 8px rgba(48,7,14,.6); -webkit-tap-highlight-color:transparent; -webkit-appearance:none; appearance:none; transform:translateY(-50%); transition:transform .2s ease,color .2s ease; }
     .lightbox-nav:hover { transform:translateY(-50%) scale(1.12); color:#a62a3c; }
+    .lightbox-nav:focus, .lightbox-nav:focus-visible { outline:none; color:#a62a3c; text-shadow:0 0 1px #f9e7a7,0 0 6px rgba(255,244,201,.98),0 2px 8px rgba(48,7,14,.65); }
     /* Horizontal placement is set outside the real image frame in JavaScript. */
     .lightbox-prev { left:16px; }
     .lightbox-next { left:auto; right:16px; }
