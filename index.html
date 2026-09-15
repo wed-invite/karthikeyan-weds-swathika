@@ -107,10 +107,20 @@
     .venue-location { margin:14px 0 0; color:var(--muted); font-size:1rem; }
     .button { display:inline-block; padding:14px 22px; border:1px solid var(--wine); color:var(--wine); font-family:Cinzel,serif; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-decoration:none; text-transform:uppercase; transition:.2s; }
     .button:hover { background:var(--wine); color:#fff; }
-    .gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:900px; margin:42px auto 0; }
-    .gallery figure { margin:0; min-height:310px; overflow:hidden; background:#dbcdb5; border:1px solid rgba(166,122,45,.32); border-radius:22px; box-shadow:0 12px 30px rgba(72,35,28,.12); }
+    .gallery { position:relative; width:min(850px,100%); height:430px; margin:42px auto 0; touch-action:pan-y; }
+    .gallery figure { position:absolute; top:0; left:50%; width:290px; height:390px; min-height:0; margin:0; overflow:hidden; background:#dbcdb5; border:1px solid rgba(166,122,45,.42); border-radius:22px; box-shadow:0 12px 30px rgba(72,35,28,.15); cursor:zoom-in; transition:transform .58s cubic-bezier(.22,.8,.25,1),opacity .4s ease,filter .4s ease; }
+    .gallery figure[data-stack="front-left"] { z-index:5; transform:translateX(-104%) rotate(-1.2deg); }
+    .gallery figure[data-stack="front-right"] { z-index:6; transform:translateX(4%) rotate(1.2deg); }
+    .gallery figure[data-stack="back-one"] { z-index:3; opacity:.78; filter:saturate(.9); transform:translateX(-50%) translateY(-17px) rotate(-3.2deg) scale(.91); pointer-events:none; }
+    .gallery figure[data-stack="back-two"] { z-index:2; opacity:.62; filter:saturate(.82); transform:translateX(-49%) translateY(25px) rotate(3.4deg) scale(.87); pointer-events:none; }
+    .gallery figure[data-stack="hidden"] { z-index:1; opacity:0; transform:translateX(-50%) translateY(36px) scale(.82); pointer-events:none; }
     .gallery img { width:100%; height:100%; object-fit:cover; display:block; cursor:zoom-in; transition:transform .7s ease; }
     .gallery figure:hover img { transform:scale(1.06); }
+    .gallery-carousel-controls { display:flex; align-items:center; justify-content:center; gap:22px; width:min(850px,100%); margin:4px auto 0; }
+    .gallery-step { display:inline-flex; align-items:center; gap:7px; padding:7px 4px; border:0; background:transparent; color:#851f2e; cursor:pointer; font:600 .7rem Cinzel,serif; letter-spacing:.1em; text-transform:uppercase; -webkit-tap-highlight-color:transparent; }
+    .gallery-step span { color:#9a6517; font:700 1.75rem/.7 "Cormorant Garamond",serif; }
+    .gallery-step:hover { color:#a62a3c; }
+    .gallery-position { min-width:54px; color:#8d6217; font:600 .67rem Cinzel,serif; letter-spacing:.1em; text-align:center; }
     .lightbox { position:fixed; z-index:90; inset:0; display:grid; place-items:center; overflow:hidden; padding:0; background:rgba(38,7,13,.28); backdrop-filter:blur(5px); opacity:0; pointer-events:none; transition:opacity .25s ease; }
     .lightbox.is-open { opacity:1; pointer-events:auto; }
     .lightbox::before { content:"Gallery"; position:absolute; z-index:1; top:calc(env(safe-area-inset-top) + 22px); left:50%; color:#f9e7a7; font:600 .7rem Cinzel,serif; letter-spacing:.2em; text-transform:uppercase; transform:translateX(-50%); }
@@ -189,9 +199,11 @@
       .section { padding:65px 20px; }
       .welcome-section,.story-section { padding-top:52px; padding-bottom:52px; }
       #celebrations,.gallery-section,.gallery-section + .section { padding-top:52px; }
-      .gallery { display:flex; grid-template-columns:none; gap:16px; margin-left:-20px; margin-right:-20px; padding:0 20px 8px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
-      .gallery::-webkit-scrollbar { display:none; }
-      .gallery figure { flex:0 0 82vw; min-height:0; height:clamp(390px,112vw,560px); scroll-snap-align:start; }
+      .gallery { width:100%; height:clamp(390px,108vw,500px); margin:36px auto 0; }
+      .gallery figure { width:min(74vw,310px); height:clamp(370px,101vw,475px); }
+      .gallery figure[data-stack="front-left"] { transform:translateX(-58%) rotate(-1.8deg); }
+      .gallery figure[data-stack="front-right"] { transform:translateX(-42%) translateY(14px) rotate(1.8deg); }
+      .gallery-carousel-controls { margin-top:6px; gap:16px; }
       .map-share > div + div { border-left:0; border-top:1px solid #ecdfc7; }
     }
     @media (prefers-reduced-motion:reduce) { * { animation-duration:.01ms!important; scroll-behavior:auto!important; } }
@@ -262,6 +274,13 @@
         <figure><img src="Photo-1.jpg" alt="Karthikeyan and Swathika sharing a beautiful moment"></figure>
         <figure><img src="Photo-2.jpg" alt="Karthikeyan and Swathika walking together"></figure>
         <figure><img src="Photo-3.jpg" alt="Karthikeyan and Swathika at sunset"></figure>
+        <figure><img src="Photo-4.jpg" alt="Karthikeyan and Swathika at sunset"></figure>
+        <figure><img src="Photo-5.jpg" alt="Karthikeyan and Swathika at sunset"></figure>
+      </div>
+      <div class="gallery-carousel-controls" aria-label="Gallery navigation">
+        <button class="gallery-step" id="gallery-previous" type="button" aria-label="Show previous photos"><span aria-hidden="true">&#8249;</span> Previous</button>
+        <span class="gallery-position" id="gallery-position" aria-live="polite"></span>
+        <button class="gallery-step" id="gallery-next" type="button" aria-label="Show next photos">Next <span aria-hidden="true">&#8250;</span></button>
       </div>
     </section>
 
@@ -329,12 +348,20 @@
     /* =======================================================================
        3. GALLERY PHOTO VIEWER
        ======================================================================= */
-    const lightbox = document.getElementById('lightbox'), lightboxFrame = document.getElementById('lightbox-frame'), lightboxImage = document.getElementById('lightbox-image'), lightboxClose = document.getElementById('lightbox-close'), lightboxPrev = document.getElementById('lightbox-prev'), lightboxNext = document.getElementById('lightbox-next'), galleryImages = Array.from(document.querySelectorAll('.gallery img'));
+    const lightbox = document.getElementById('lightbox'), lightboxFrame = document.getElementById('lightbox-frame'), lightboxImage = document.getElementById('lightbox-image'), lightboxClose = document.getElementById('lightbox-close'), lightboxPrev = document.getElementById('lightbox-prev'), lightboxNext = document.getElementById('lightbox-next'), gallery = document.querySelector('.gallery'), galleryFigures = Array.from(document.querySelectorAll('.gallery figure')), galleryImages = Array.from(document.querySelectorAll('.gallery img')), galleryPrevious = document.getElementById('gallery-previous'), galleryNext = document.getElementById('gallery-next'), galleryPosition = document.getElementById('gallery-position');
+    let galleryCarouselIndex = 0, galleryTouchStartX = 0, suppressGalleryClick = false;
+    const showGalleryDeck = () => { const count = galleryFigures.length; galleryFigures.forEach((figure,index) => { const position = (index - galleryCarouselIndex + count) % count; figure.dataset.stack = position === 0 ? 'front-left' : position === 1 ? 'front-right' : position === 2 ? 'back-one' : position === 3 ? 'back-two' : 'hidden'; }); galleryPosition.textContent = 'Tap to view'; galleryPrevious.hidden = galleryNext.hidden = count < 2; };
+    const moveGalleryDeck = direction => { galleryCarouselIndex = (galleryCarouselIndex + direction + galleryFigures.length) % galleryFigures.length; showGalleryDeck(); };
+    showGalleryDeck();
+    galleryPrevious.addEventListener('click', () => moveGalleryDeck(-1));
+    galleryNext.addEventListener('click', () => moveGalleryDeck(1));
+    gallery.addEventListener('pointerdown', event => { galleryTouchStartX = event.clientX; });
+    gallery.addEventListener('pointerup', event => { const distance = event.clientX - galleryTouchStartX; if (Math.abs(distance) > 35) { suppressGalleryClick = true; moveGalleryDeck(distance < 0 ? 1 : -1); setTimeout(() => { suppressGalleryClick = false; }, 0); } });
     let activeGalleryIndex = 0;
     const closeLightbox = () => { lightbox.classList.remove('is-open', 'is-zoomed'); lightbox.setAttribute('aria-hidden', 'true'); document.body.classList.remove('no-scroll'); };
     const positionLightboxNavigation = () => { if (!lightbox.classList.contains('is-open')) return; const frameBounds = lightboxFrame.getBoundingClientRect(), buttonSize = lightboxPrev.offsetWidth || 52; if (!frameBounds.width || !frameBounds.height) return; const gap = 24, screenInset = 16, centreY = frameBounds.top + frameBounds.height / 2; const previousLeft = Math.max(screenInset, frameBounds.left - buttonSize - gap); const nextLeft = Math.min(window.innerWidth - buttonSize - screenInset, frameBounds.right + gap); lightboxPrev.style.left = `${previousLeft}px`; lightboxPrev.style.top = `${centreY}px`; lightboxNext.style.left = `${nextLeft}px`; lightboxNext.style.right = 'auto'; lightboxNext.style.top = `${centreY}px`; };
     const showGalleryPhoto = (index, direction = 0) => { activeGalleryIndex = (index + galleryImages.length) % galleryImages.length; const image = galleryImages[activeGalleryIndex]; lightboxImage.classList.remove('slide-from-left', 'slide-from-right'); void lightboxImage.offsetWidth; lightboxImage.src = image.currentSrc || image.src; lightboxImage.alt = image.alt; lightboxImage.classList.toggle('slide-from-right', direction > 0); lightboxImage.classList.toggle('slide-from-left', direction < 0); lightbox.classList.remove('is-zoomed'); requestAnimationFrame(positionLightboxNavigation); };
-    galleryImages.forEach((image, index) => image.addEventListener('click', () => { showGalleryPhoto(index); lightbox.classList.add('is-open'); lightbox.setAttribute('aria-hidden', 'false'); document.body.classList.add('no-scroll'); requestAnimationFrame(positionLightboxNavigation); }));
+    galleryImages.forEach((image, index) => image.addEventListener('click', () => { if (suppressGalleryClick) return; showGalleryPhoto(index); lightbox.classList.add('is-open'); lightbox.setAttribute('aria-hidden', 'false'); document.body.classList.add('no-scroll'); requestAnimationFrame(positionLightboxNavigation); }));
     lightboxClose.addEventListener('click', closeLightbox);
     lightboxPrev.addEventListener('click', event => { event.stopPropagation(); showGalleryPhoto(activeGalleryIndex - 1, -1); });
     lightboxNext.addEventListener('click', event => { event.stopPropagation(); showGalleryPhoto(activeGalleryIndex + 1, 1); });
